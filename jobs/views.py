@@ -3,7 +3,9 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from jobs.models import Server, BackupJob
+from backupserver.models import BackupServer
 from jobs.serializers import ServerSerializer, JobSerializer
+import json
 # Create your views here.
 """
 Algorithm for saving from agent POST request
@@ -12,10 +14,46 @@ Algorithm for saving from agent POST request
 * Agent data should have an additional field, "Server Name" so the server ID of the associated Server the job is associated with can be fetched
 * Fetch the server ID from the "Server Name" in the JSON request
 * Append the server ID to the JSON, with a key of "server"
-* Remote the "Server Name" key from the JSON
+* Remove the "Server Name" key from the JSON
 * return this new JSON string to the JobSerializer
-"""
 
+
+The POST request will be in the following format
+{"backupID": id,
+ "jobs": [jobs]
+}
+"""
+def addJobs(data):
+#this function takes the POST request data and creates jobs from there
+   backup_server = data["backupID"]
+   jobs = data["jobs"]
+   result = False
+   for job in jobs:
+      serializer = JobSerializer(data=jobFormat(job, backup_server))
+      if serializer.is_valid():
+         serializer.save()
+         result = True
+      else:
+         result = False
+   return result
+
+def createServer(server_name, backup_server):
+#creates a server if it does not already exist
+   backup_obj = BackupServer.objects.get(id=backup_server)
+   server = Server(name=server_name, backupsvr=backup_obj)
+   server.save()
+   return server.id
+
+def jobFormat(job, backup_server):
+#formats the job JSON so it can be accepted by the serializer
+   server_name = job["server"]
+   server_ID = Server.objects.filter(name=server_name)
+   if server_ID:
+      server_ID = server_ID[0].id
+   else:
+      server_ID = createServer(server_name, backup_server)
+   job["server"] = server_ID
+   return job
 
 @api_view(['GET', 'POST'])
 def job_list(request):
@@ -24,10 +62,8 @@ def job_list(request):
       serializer = JobSerializer(jobs, many=True)
       return Response(serializer.data)
    elif request.method == 'POST':
-      serializer = JobSerializer(data=request.data)
-      if serializer.is_valid():
-         serializer.save()
-         return Response(serializer.data, status=status.HTTP_201_CREATED)
+      if addJobs(request.data):
+         return Response(status=status.HTTP_201_CREATED)
       return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
    elif request.method == 'DELETE':
       BackupJob.objects.get(pk=pk).delete()
