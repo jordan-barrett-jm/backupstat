@@ -4,3 +4,4 @@ from django.db import models
 class BackupServer(models.Model):
    name = models.CharField(max_length=100, default='')
    company = models.CharField(max_length=100, default='')
+   application = models.CharField(max_length=100, default='')

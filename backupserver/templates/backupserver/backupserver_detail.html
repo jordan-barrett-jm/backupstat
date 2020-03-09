@@ -1,0 +1,8 @@
+<html>
+<body>
+	<h2>{{ server.name }}</h2>
+	<p>Application: {{ server.application }}</p>
+	<p>Company Name: {{ server.company }}</p>
+	<a href="{%url 'backup'%}delete/{{ server.id }}">Delete</a>
+</body>
+</html>
