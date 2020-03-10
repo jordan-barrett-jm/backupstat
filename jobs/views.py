@@ -29,6 +29,12 @@ def addJobs(data):
    jobs = data["jobs"]
    result = False
    for job in jobs:
+      #don't save repeats
+      jobfilter = BackupJob.objects.filter(name=job["name"].strip(), start_time=job["start_time"].strip())
+      print (jobfilter)
+      if jobfilter:
+         print ("yes")
+         continue
       serializer = JobSerializer(data=jobFormat(job, backup_server))
       if serializer.is_valid():
          serializer.save()
@@ -64,7 +70,7 @@ def job_list(request):
    elif request.method == 'POST':
       if addJobs(request.data):
          return Response(status=status.HTTP_201_CREATED)
-      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+      return Response(status=status.HTTP_400_BAD_REQUEST)
    elif request.method == 'DELETE':
       BackupJob.objects.get(pk=pk).delete()
       return Response(status=status.HTTP_204_NO_CONTENT)
