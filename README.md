@@ -1,4 +1,4 @@
-# Backupstat - monitor your backup servers from one interface
+# Backupstat - monitor your backup jobs from one interface
 
 Gives an overview of the status of jobs running on backup servers. Application built for MSPs who have to manage multiple backup servers
 
