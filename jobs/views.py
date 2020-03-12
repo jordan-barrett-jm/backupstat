@@ -65,8 +65,9 @@ def jobFormat(job, backup_server):
 def job_list(request):
    if request.method == 'GET':
       jobs = BackupJob.objects.all()
-      serializer = JobSerializer(jobs, many=True)
-      return Response(serializer.data)
+      #serializer = JobSerializer(jobs, many=True)
+      context = {"jobs": jobs}
+      return render(request, 'jobs/jobs.html', context)
    elif request.method == 'POST':
       if addJobs(request.data):
          return Response(status=status.HTTP_201_CREATED)
@@ -74,4 +75,5 @@ def job_list(request):
    elif request.method == 'DELETE':
       BackupJob.objects.get(pk=pk).delete()
       return Response(status=status.HTTP_204_NO_CONTENT)
+
 

@@ -1,0 +1,25 @@
+<html>
+<body>
+	<h1>Job History</h1>
+	<table>
+		<thead>
+		<tr>
+			<td>Name</td>
+			<td>Type</td>
+			<td>Server</td>
+			<td>Start Time</td>
+			<td>Status</td>
+		</tr>
+		</thead>
+		{%for job in jobs%}
+		<tr>
+			<td>{{ job.name }}</td>
+			<td>{{ job.type }}</td>
+			<td>{{ job.server.name }}</td>
+			<td>{{ job.start_time }}</td>
+			<td>{{ job.status }} {%if job.comment%}- {{ job.comment }}{%endif%} </td>
+		</tr>	
+		{%endfor%}
+	</table>
+</body>
+</html>
