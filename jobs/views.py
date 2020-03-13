@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework_api_key.permissions import HasAPIKey
 from jobs.models import Server, BackupJob
 from backupserver.models import BackupServer
 from jobs.serializers import ServerSerializer, JobSerializer
@@ -61,19 +62,18 @@ def jobFormat(job, backup_server):
    job["server"] = server_ID
    return job
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
+@permission_classes([HasAPIKey])
+def job_post(request):
+   if addJobs(request.data):
+      return Response(status=status.HTTP_201_CREATED)
+   return Response(status=status.HTTP_400_BAD_REQUEST)
+
 def job_list(request):
-   if request.method == 'GET':
-      jobs = BackupJob.objects.all()
-      #serializer = JobSerializer(jobs, many=True)
-      context = {"jobs": jobs}
-      return render(request, 'jobs/jobs.html', context)
-   elif request.method == 'POST':
-      if addJobs(request.data):
-         return Response(status=status.HTTP_201_CREATED)
-      return Response(status=status.HTTP_400_BAD_REQUEST)
-   elif request.method == 'DELETE':
+   if request.method == 'DELETE':
       BackupJob.objects.get(pk=pk).delete()
       return Response(status=status.HTTP_204_NO_CONTENT)
-
-
+   jobs = BackupJob.objects.all()
+   context = {"jobs": jobs}
+   return render(request, 'jobs/jobs.html', context)
+   

@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'rest_framework',
+    'rest_framework_api_key',
     'jobs.apps.JobsConfig',
     'backupserver.apps.BackupserverConfig',
     'django.contrib.admin',
