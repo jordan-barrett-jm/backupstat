@@ -1,14 +1,24 @@
 <html>
+<head>
+	<script src="https://kit.fontawesome.com/54cd34c730.js" crossorigin="anonymous"></script>
+</head>
 <body>
 	<h1>Job History</h1>
+	<h2>Filter Jobs</h2>
+	<form action="" method="post">
+		{% csrf_token %}
+		{{ form }}
+		<input type="submit" value="Filter">		
+	</form>
+	<div>
 	<table>
 		<thead>
 		<tr>
-			<td>Name</td>
-			<td>Type</td>
-			<td>Server</td>
-			<td>Start Time</td>
-			<td>Status</td>
+			<td>Name <i class="fas fa-sort"></i></td>
+			<td>Type <i class="fas fa-sort"></i></td>
+			<td>Server <i class="fas fa-sort"></i></td>
+			<td>Start Time<i class="fas fa-sort"></i></td>
+			<td>Status<i class="fas fa-sort"></i></td>
 		</tr>
 		</thead>
 		{%for job in jobs%}
@@ -21,5 +31,6 @@
 		</tr>	
 		{%endfor%}
 	</table>
+	</div>
 </body>
 </html>

@@ -7,7 +7,9 @@ from jobs.models import Server, BackupJob
 from backupserver.models import BackupServer
 from jobs.serializers import ServerSerializer, JobSerializer
 import json
-# Create your views here.
+import datetime
+from jobs.forms import FilterForm
+
 """
 Algorithm for saving from agent POST request
 
@@ -24,6 +26,7 @@ The POST request will be in the following format
  "jobs": [jobs]
 }
 """
+
 def addJobs(data):
 #this function takes the POST request data and creates jobs from there
    backup_server = data["backupID"]
@@ -62,6 +65,7 @@ def jobFormat(job, backup_server):
    job["server"] = server_ID
    return job
 
+#accepts JSON post requests only from agents that have an authorized API key
 @api_view(['POST'])
 @permission_classes([HasAPIKey])
 def job_post(request):
@@ -69,11 +73,40 @@ def job_post(request):
       return Response(status=status.HTTP_201_CREATED)
    return Response(status=status.HTTP_400_BAD_REQUEST)
 
+#filter backup jobs based on specifications from the form
+#date from form is yyyy-mm-dd
+def filterJobs(form):
+   if form.cleaned_data["backupserver"] != "--ALL--":
+      servers = Server.objects.filter(backupsvr__id=form.cleaned_data["backupserver"])
+      jobs = []
+      for server in servers:
+         jobs += BackupJob.objects.filter(server__id=server.id)
+   else:
+      jobs = BackupJob.objects.all()
+   fromDate = form.cleaned_data["fromDate"]
+   toDate = form.cleaned_data["toDate"]
+   filter_jobs = []
+   if jobs:
+      for job in jobs:
+         job_date = datetime.datetime.strptime(job.start_time, "%m/%d/%Y %H:%M:%S").date()
+         if toDate >= job_date >= fromDate:
+            filter_jobs += BackupJob.objects.filter(id=job.id)
+   return filter_jobs
+
+#returns a list of backup jobs
 def job_list(request):
-   if request.method == 'DELETE':
+   if request.method == 'POST':
+      form = FilterForm(request.POST)
+      if form.is_valid():
+         filtered_jobs = filterJobs(form)
+         newform = FilterForm()
+         context = {"jobs":filtered_jobs, "form":newform}
+         return render(request, 'jobs/jobs.html', context)
+   elif request.method == 'DELETE':
       BackupJob.objects.get(pk=pk).delete()
       return Response(status=status.HTTP_204_NO_CONTENT)
+   form = FilterForm()
    jobs = BackupJob.objects.all()
-   context = {"jobs": jobs}
+   context = {"jobs": jobs, "form":form}
    return render(request, 'jobs/jobs.html', context)
    
