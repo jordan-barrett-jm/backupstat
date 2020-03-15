@@ -37,7 +37,6 @@ def addJobs(data):
       jobfilter = BackupJob.objects.filter(name=job["name"].strip(), start_time=job["start_time"].strip())
       print (jobfilter)
       if jobfilter:
-         print ("yes")
          continue
       serializer = JobSerializer(data=jobFormat(job, backup_server))
       if serializer.is_valid():
@@ -73,25 +72,59 @@ def job_post(request):
       return Response(status=status.HTTP_201_CREATED)
    return Response(status=status.HTTP_400_BAD_REQUEST)
 
+#returns a filtered job QuerySet for a specified time period
+def timeFilter(jobs, fromDate, toDate):
+   filter_jobs = 0
+   for job in jobs:
+      job_date = datetime.datetime.strptime(job.start_time, "%m/%d/%Y %H:%M:%S").date()
+      if toDate >= job_date >= fromDate:
+         if not filter_jobs:
+            filter_jobs = BackupJob.objects.filter(id=job.id)
+         else:
+            filter_jobs |= BackupJob.objects.filter(id=job.id)
+   return filter_jobs
+
 #filter backup jobs based on specifications from the form
 #date from form is yyyy-mm-dd
 def filterJobs(form):
    if form.cleaned_data["backupserver"] != "--ALL--":
       servers = Server.objects.filter(backupsvr__id=form.cleaned_data["backupserver"])
-      jobs = []
+      jobs = 0
       for server in servers:
-         jobs += BackupJob.objects.filter(server__id=server.id)
+         if not jobs:
+            jobs = BackupJob.objects.filter(server__id=server.id)
+         else:
+            jobs |= BackupJob.objects.filter(server__id=server.id)
    else:
       jobs = BackupJob.objects.all()
    fromDate = form.cleaned_data["fromDate"]
    toDate = form.cleaned_data["toDate"]
-   filter_jobs = []
    if jobs:
-      for job in jobs:
-         job_date = datetime.datetime.strptime(job.start_time, "%m/%d/%Y %H:%M:%S").date()
-         if toDate >= job_date >= fromDate:
-            filter_jobs += BackupJob.objects.filter(id=job.id)
+      filter_jobs = timeFilter(jobs, fromDate, toDate)
    return filter_jobs
+
+#sort jobs by the specified sort type
+def jobSort(sort_type, order, jobs):
+   if order == "ascending":
+      jobs = jobs.order_by(sort_type)
+   else: 
+      jobs = jobs.order_by(sort_type).reverse()
+   return jobs
+
+#returns a tuple with the sort value and the order
+def sortType(rq):
+   reverse_sort = 0
+   try:
+      sort_type = rq.get("sort-reverse")
+      if sort_type:
+         reverse_sort = 1
+   except IndexError:
+      pass
+   if reverse_sort:
+      return (sort_type, "descending")
+   else:
+      sort_type = rq.get("sort")
+      return (sort_type, "ascending")
 
 #returns a list of backup jobs
 def job_list(request):
@@ -99,14 +132,27 @@ def job_list(request):
       form = FilterForm(request.POST)
       if form.is_valid():
          filtered_jobs = filterJobs(form)
+         if request.GET:
+            sort_type = sortType(request.GET)
+            filtered_jobs = jobSort(sort_type[0], sort_type[1],  filtered_jobs)
          newform = FilterForm()
          context = {"jobs":filtered_jobs, "form":newform}
          return render(request, 'jobs/jobs.html', context)
    elif request.method == 'DELETE':
       BackupJob.objects.get(pk=pk).delete()
       return Response(status=status.HTTP_204_NO_CONTENT)
-   form = FilterForm()
    jobs = BackupJob.objects.all()
+   fromDate = datetime.datetime.today() - datetime.timedelta(days=7)
+   toDate = datetime.datetime.today()
+   jobs = timeFilter(jobs, fromDate.date(), toDate.date())
+   #if a sort request is made then run the sort function
+   if request.GET:
+      sort = sortType(request.GET)
+      jobs = jobSort(sort[0], sort[1], jobs)
+   else:
+   #otherwise provide default sort which is from latest start time to oldest
+      jobs = jobs.order_by("start_time").reverse()
+   form = FilterForm()
    context = {"jobs": jobs, "form":form}
    return render(request, 'jobs/jobs.html', context)
    
