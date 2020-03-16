@@ -1,5 +1,14 @@
+{% load static %}
 <html>
-	<body>
+<head>
+	<link rel="stylesheet" type="text/css" href={% static 'semantic.css'%}>
+</head>
+<body>
+		<div class="ui menu">
+        	        <a class="item" href={% url 'backup'%}>Manage Backup Servers</a>
+                	<a class="item" href={% url 'jobs'%}>View Backup Jobs</a>
+	                <a class="item">Admin</a>
+	        </div>
 		<h1>Backup Servers</h1>
 		{%for server in servers%}
 		<ul>
@@ -7,5 +16,5 @@
 		</ul>	
 		{%endfor%}
 		<a href="{% url 'add' %}">Add a backup server</a>
-	</body>
+</body>
 </html>
