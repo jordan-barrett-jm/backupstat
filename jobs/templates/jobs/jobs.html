@@ -16,6 +16,7 @@
 			<td>Name <button name="sort" type="submit" value="name" style="outline: 0;"><i class="fas fa-sort-up"></i></button><button name="sort-reverse" type="submit" value="name" style="outline: 0;"><i class="fas fa-sort-down"></i></button></td>
 			<td>Type <button name="sort" type="submit" value="type" style="outline: 0;"><i class="fas fa-sort-up"></i></button><button name="sort-reverse" type="submit" value="type" style="outline: 0;"><i class="fas fa-sort-down"></i></button></td>
 			<td>Server <button name="sort" type="submit" value="server" style="outline: 0;"><i class="fas fa-sort-up"></i></button><button name="sort-reverse" type="submit" value="server" style="outline: 0;"><i class="fas fa-sort-down"></i></button></td>
+			<td>Company</td>
 			<td>Start Time <button name="sort" type="submit" value="start_time" style="outline: 0;"><i class="fas fa-sort-up"></i></button><button name="sort-reverse" type="submit" value="start_time" style="outline: 0;"><i class="fas fa-sort-down"></i></button></td>
 			<td>Status <button name="sort" type="submit" value="status" style="outline: 0;"><i class="fas fa-sort-up"></i></button><button name="sort-reverse" type="submit" value="status" style="outline: 0;"><i class="fas fa-sort-down"></i></button></td>
 		</form>
@@ -26,6 +27,7 @@
 			<td>{{ job.name }}</td>
 			<td>{{ job.type }}</td>
 			<td>{{ job.server.name }}</td>
+			<td>{{ job.server.backupsvr.company }}</td>
 			<td>{{ job.start_time }}</td>
 			<td>{{ job.status }} {%if job.comment%}- {{ job.comment }}{%endif%} </td>
 		</tr>	

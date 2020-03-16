@@ -3,6 +3,11 @@
 	<h2>{{ server.name }}</h2>
 	<p>Application: {{ server.application }}</p>
 	<p>Company Name: {{ server.company }}</p>
+	{% if server.last_communication %}
+	<p>Last communication: {{ server.last_communication }}</p>
+	{% elif not server.last_communication %}
+	<p>No communication has been made with this server</p>
+	{% endif %}
 	<a href="{%url 'backup'%}delete/{{ server.id }}">Delete</a>
 </body>
 </html>

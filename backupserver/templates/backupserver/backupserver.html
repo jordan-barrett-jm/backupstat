@@ -1,5 +1,6 @@
 <html>
 	<body>
+		<h1>Backup Servers</h1>
 		{%for server in servers%}
 		<ul>
 			<a href="{% url 'backup'%}detail/{{server.id}}"<li>{{ server.name }}</li>

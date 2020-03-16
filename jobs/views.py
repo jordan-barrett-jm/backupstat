@@ -10,7 +10,7 @@ import json
 import datetime
 from jobs.forms import FilterForm
 from django.core.paginator import Paginator
-
+from dateutil import tz
 """
 Algorithm for saving from agent POST request
 
@@ -27,10 +27,21 @@ The POST request will be in the following format
  "jobs": [jobs]
 }
 """
+def localTime():
+   HERE = tz.gettz("America/Bogota")
+   UTC = tz.gettz('UTC')
+   now = datetime.datetime.utcnow()
+   gmt = now.replace(tzinfo=UTC)
+   gmt.astimezone(HERE)
+   return gmt.astimezone(HERE)
 
 def addJobs(data):
 #this function takes the POST request data and creates jobs from there
    backup_server = data["backupID"]
+   #update the backupserver with the last communication time
+   bksvr = BackupServer.objects.get(id=backup_server)
+   bksvr.last_communication = str(localTime())
+   bksvr.save()
    jobs = data["jobs"]
    result = False
    for job in jobs:

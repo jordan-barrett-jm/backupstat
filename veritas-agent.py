@@ -14,6 +14,7 @@ config.read('veritas_agent.ini')
 LOG_DIRECTORY = config["CONFIGURATION"]["log_directory"]
 BACKUPSERVER_ID = int(config["CONFIGURATION"]["backupserver"])
 BACKUPSTAT_URL = config["CONFIGURATION"]["server_url"]
+API_KEY = config["CONFIGURATION"]["api_key"]
 START_DATE = datetime.datetime.now() - datetime.timedelta(days=int(config["CONFIGURATION"]["capture_period"]))
 END_DATE = datetime.datetime.now()
 
@@ -151,7 +152,9 @@ def backupstatPOST():
 "jobs": %s 
 }
 """ % (BACKUPSERVER_ID, backupJobs(START_DATE, END_DATE, LOG_DIRECTORY))
-    r = requests.post(BACKUPSTAT_URL, json=json.loads(data))
+    headers = {'Authorization': ("Api-Key %s") % (API_KEY)}
+    r = requests.post(BACKUPSTAT_URL, json=json.loads(data), headers=headers)
     print (data)
     
 backupstatPOST()
+exit()
