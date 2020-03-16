@@ -9,6 +9,7 @@ from jobs.serializers import ServerSerializer, JobSerializer
 import json
 import datetime
 from jobs.forms import FilterForm
+from django.core.paginator import Paginator
 
 """
 Algorithm for saving from agent POST request
@@ -86,9 +87,9 @@ def timeFilter(jobs, fromDate, toDate):
 
 #filter backup jobs based on specifications from the form
 #date from form is yyyy-mm-dd
-def filterJobs(form):
-   if form.cleaned_data["backupserver"] != "--ALL--":
-      servers = Server.objects.filter(backupsvr__id=form.cleaned_data["backupserver"])
+def filterJobs(form_dict):
+   if form_dict["backupserver"] != "--ALL--":
+      servers = Server.objects.filter(backupsvr__id=form_dict["backupserver"])
       jobs = 0
       for server in servers:
          if not jobs:
@@ -97,11 +98,12 @@ def filterJobs(form):
             jobs |= BackupJob.objects.filter(server__id=server.id)
    else:
       jobs = BackupJob.objects.all()
-   fromDate = form.cleaned_data["fromDate"]
-   toDate = form.cleaned_data["toDate"]
+   fromDate = form_dict["fromDate"]
+   toDate = form_dict["toDate"]
    if jobs:
       filter_jobs = timeFilter(jobs, fromDate, toDate)
-   return filter_jobs
+      return filter_jobs
+   return ""
 
 #sort jobs by the specified sort type
 def jobSort(sort_type, order, jobs):
@@ -128,30 +130,56 @@ def sortType(rq):
 
 #returns a list of backup jobs
 def job_list(request):
-   if request.method == 'POST':
-      form = FilterForm(request.POST)
-      if form.is_valid():
-         filtered_jobs = filterJobs(form)
-         if request.GET:
-            sort_type = sortType(request.GET)
-            filtered_jobs = jobSort(sort_type[0], sort_type[1],  filtered_jobs)
-         newform = FilterForm()
-         context = {"jobs":filtered_jobs, "form":newform}
-         return render(request, 'jobs/jobs.html', context)
-   elif request.method == 'DELETE':
+   if request.method == 'DELETE':
       BackupJob.objects.get(pk=pk).delete()
       return Response(status=status.HTTP_204_NO_CONTENT)
    jobs = BackupJob.objects.all()
-   fromDate = datetime.datetime.today() - datetime.timedelta(days=7)
-   toDate = datetime.datetime.today()
-   jobs = timeFilter(jobs, fromDate.date(), toDate.date())
-   #if a sort request is made then run the sort function
+   #checks if there were additional parameters passed to the site in the URL (if there is a sort or filter being done)
    if request.GET:
-      sort = sortType(request.GET)
-      jobs = jobSort(sort[0], sort[1], jobs)
-   else:
-   #otherwise provide default sort which is from latest start time to oldest
+   #if a sort request was made by the user then handle it
+      if "sort" in request.GET or "sort-reverse" in request.GET:
+          sort = sortType(request.GET)
+          #save the user specified sort to the session
+          request.session['sort'] = sort
+          if "filter" in request.session:
+             filter_data = request.session["filter"]
+             #format the dates to a date object for use by the filterJobs function
+             fromDate = datetime.datetime.strptime(filter_data["fromDate"], "%Y-%m-%d").date()
+             toDate = datetime.datetime.strptime(filter_data["toDate"], "%Y-%m-%d").date()
+             #put the data into a dictionary so filterJobs can operate on it
+             form_dict = {"backupserver": filter_data["backupserver"], "fromDate": fromDate, "toDate": toDate}
+             #apply and save the filter to jobs
+             jobs = filterJobs(form_dict)
+          if jobs:
+             jobs = jobSort(sort[0], sort[1], jobs)
+    #if backupserver parameter is in the site URL that means a filter is being done
+      elif "backupserver" in request.GET:
+         form = FilterForm(request.GET)
+         if form.is_valid():
+            #pass the data from the form to the fitlerJobs function to get jobs that meet the user specifications
+            filtered_jobs = filterJobs(form.cleaned_data)
+            form_data = form.cleaned_data
+            #save the data from the form to the session
+            request.session["filter"] = {'backupserver': form_data["backupserver"], "fromDate": str(form_data["fromDate"]), "toDate": str(form_data["toDate"])}
+            #if the user previously specified a sort and filtered_jobs came back with results then sort these results based on previous user specifications for sort
+            if filtered_jobs and "sort" in request.session:
+               sort_type = request.session["sort"]
+               filtered_jobs = jobSort(sort_type[0], sort_type[1],  filtered_jobs)
+            newform = FilterForm()
+            context = {"jobs":filtered_jobs, "form":newform}
+            return render(request, 'jobs/jobs.html', context)
+   #if the user has not specified a sort then provide default sort which is from latest start time to oldest
+   if "sort" not in request.session:
       jobs = jobs.order_by("start_time").reverse()
+   #if the user has not specified a filter then apply the default filter
+   if "filter" not in request.session:
+      fromDate = datetime.datetime.today() - datetime.timedelta(days=7)
+      toDate = datetime.datetime.today()
+      jobs = timeFilter(jobs, fromDate.date(), toDate.date())
+#   paginator = Paginator(jobs, 2)
+#   print ('page' in request.GET)
+#   page_num = request.GET.get('page')
+#   job_page = paginator.get_page(page_num)
    form = FilterForm()
    context = {"jobs": jobs, "form":form}
    return render(request, 'jobs/jobs.html', context)
