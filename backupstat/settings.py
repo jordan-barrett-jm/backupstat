@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_api_key',
+    'useradmin.apps.UseradminConfig',
     'jobs.apps.JobsConfig',
     'backupserver.apps.BackupserverConfig',
     'django.contrib.admin',
@@ -125,3 +126,4 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
    os.path.join(BASE_DIR, "static")
 ]
+LOGIN_REDIRECT_URL = '/'

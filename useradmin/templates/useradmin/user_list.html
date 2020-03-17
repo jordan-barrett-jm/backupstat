@@ -1,0 +1,9 @@
+{% extends 'jobs/base.html'%}
+
+{%block content%}
+<ul>
+	{% for user in users%}
+	<li><a href="{% url 'users'%}detail/{{ user.username }}"\>{{ user.username }}</a></li>
+	{%endfor%}
+</ul>
+{%endblock%}

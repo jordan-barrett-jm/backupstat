@@ -1,18 +1,9 @@
-{% load static %}
-<html>
-<head>
-	<link rel="stylesheet" type="text/css" href={% static 'semantic.css'%}>
-</head>
-<body>
-	<div class="ui menu">
-                <a class="item" href={% url 'backup'%}>Manage Backup Servers</a>
-                <a class="item" href={% url 'jobs'%}>View Backup Jobs</a>
-                <a class="item">Admin</a>
-        </div>
+{%extends 'jobs/base.html'%}
+
+{% block content %}
 	<form action="{%url 'add'%}" method="POST">
 		{% csrf_token %}
 		{{ form }}
 		<input type="submit" value="Add Backup Server">
 	</form>
-</body>
-</html>
+{% endblock %}

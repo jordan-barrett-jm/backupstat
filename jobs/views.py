@@ -179,6 +179,16 @@ def job_list(request):
             newform = FilterForm()
             context = {"jobs":filtered_jobs, "form":newform}
             return render(request, 'jobs/jobs.html', context)
+   else:
+      if "sort" in request.session:
+         sort_type = request.session["sort"]
+         jobs = jobSort(sort_type[0], sort_type[1], jobs)
+      if "filter" in request.session:
+         filter_data = request.session["filter"]
+         fromDate = datetime.datetime.strptime(filter_data["fromDate"], "%Y-%m-%d").date()
+         toDate = datetime.datetime.strptime(filter_data["toDate"], "%Y-%m-%d").date()
+         form_dict = {"backupserver": filter_data["backupserver"], "fromDate": fromDate, "toDate": toDate}
+         jobs = filterJobs(form_dict)
    #if the user has not specified a sort then provide default sort which is from latest start time to oldest
    if "sort" not in request.session:
       jobs = jobs.order_by("start_time").reverse()

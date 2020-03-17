@@ -2,6 +2,7 @@ from django.shortcuts import render
 from backupserver.models import BackupServer
 from backupserver.forms import BackupsvrForm
 from django.http import HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
 
 #view all backup servers
 def backupsvrList(request):
@@ -11,6 +12,7 @@ def backupsvrList(request):
    return render(request, "backupserver/backupserver.html", context)
 
 #detailed view for specific backup server
+@login_required(login_url='/useradmin/login/')
 def backupsvrDetail(request, server_id):
    backup_server = BackupServer.objects.get(id=server_id)
    return render(request, "backupserver/backupserver_detail.html", {"server": backup_server})
