@@ -9,5 +9,5 @@
 	{% elif not server.last_communication %}
 	<p>No communication has been made with this server</p>
 	{% endif %}
-	<a href="{%url 'backup'%}delete/{{ server.id }}">Delete</a>
+	<a href="{%url 'backup'%}delete/{{ server.id }}"><button class="negative ui button">Delete</button></a>
 {% endblock %}

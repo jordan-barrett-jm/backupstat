@@ -3,6 +3,7 @@ from useradmin.forms import UserForm
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate
+from django.db import IntegrityError
 
 def userList(request):
    users = User.objects.all()
@@ -21,13 +22,21 @@ def createUser(request):
          username = form.cleaned_data["username"]
          email = form.cleaned_data["email"]
          password = form.cleaned_data["password"]
-         new_user = User.objects.create_user(username, email, password)
-         new_user.save()
-         return HttpResponseRedirect('/users')
+         try:
+            new_user = User.objects.create_user(username, email, password)
+            new_user.save()
+         except IntegrityError:
+            form = UserForm()
+            context = {"form": form, "error": 1}
+            return render(request, 'useradmin/add_user.html', context)
+         return HttpResponseRedirect('/useradmin')
    form = UserForm()
    context = {"form": form}
    return render(request, 'useradmin/add_user.html', context)
 
-
+def deleteUser(request, username):
+   user = User.objects.get(username=username)
+   user.delete()
+   return HttpResponseRedirect('/useradmin')
 
 

@@ -1,9 +1,11 @@
 {% extends 'jobs/base.html'%}
 
 {%block content%}
+<h2>User Administration</h2>
 <ul>
 	{% for user in users%}
 	<li><a href="{% url 'users'%}detail/{{ user.username }}"\>{{ user.username }}</a></li>
 	{%endfor%}
 </ul>
+<a href="{% url 'create' %}"><button class="ui primary button">Add User</button></a>
 {%endblock%}

@@ -21,6 +21,7 @@
 		</tr>
 		</thead>
 		<tbody>
+		{% if jobs %}
 		{%for job in jobs%}
 		<tr>
 			<td>{{ job.name }}</td>
@@ -35,6 +36,7 @@
 			{%endif%}
 		</tr>	
 		{%endfor%}
+		{% endif %}
 		</tbody>
 	</table>
 	</div>

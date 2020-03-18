@@ -1,0 +1,8 @@
+{% extends 'jobs/base.html' %}
+{% block content %}
+<h2>User Details</h2>
+<p>Username: {{ user.username }}</p>
+<p>Email: {{ user.email }}</p>
+<a href="{%url 'users'%}delete/{{ user.username }}"><button class="negative ui button">Delete user</button></a>
+<a href="{%url 'users'%}changepass/{{ user.username }}"><button class="ui button">Change password</button></a>
+{% endblock %}

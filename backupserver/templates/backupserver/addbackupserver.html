@@ -4,6 +4,7 @@
 	<form action="{%url 'add'%}" method="POST">
 		{% csrf_token %}
 		{{ form }}
+		<br>
 		<input type="submit" value="Add Backup Server">
 	</form>
 {% endblock %}

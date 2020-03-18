@@ -1,0 +1,13 @@
+{% extends 'jobs/base.html' %}
+{% block content %}
+<h2>Create User</h2>
+{% if error %}
+	<p>This user already exists. Try a different username</p>
+{% endif %}
+<form action="{% url 'create' %}" method="post">
+	{%csrf_token%}
+	{{ form }}
+	<br><br>
+	<input class="ui primary button" type="submit" name="">
+</form>
+{% endblock %}
