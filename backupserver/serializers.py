@@ -1,3 +1,4 @@
+"""
 from rest_framework import serializers
 from models import BackupServer
 
@@ -7,3 +8,4 @@ class BackupServerSerializer(serializers.Serializer):
    class Meta:
       model = BackupServer
       fields = ('name', 'company')
+"""

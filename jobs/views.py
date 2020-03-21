@@ -1,3 +1,4 @@
+
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -11,8 +12,9 @@ import datetime
 from jobs.forms import FilterForm
 from django.core.paginator import Paginator
 from dateutil import tz
-"""
-Algorithm for saving from agent POST request
+from django.contrib.auth.decorators import login_required
+
+"""Algorithm for saving from agent POST request
 
 * Agent sends POST in JSON format
 * Agent data should have an additional field, "Server Name" so the server ID of the associated Server the job is associated with can be fetched
@@ -27,6 +29,7 @@ The POST request will be in the following format
  "jobs": [jobs]
 }
 """
+
 def localTime():
    HERE = tz.gettz("America/Bogota")
    UTC = tz.gettz('UTC')
@@ -140,6 +143,7 @@ def sortType(rq):
       return (sort_type, "ascending")
 
 #returns a list of backup jobs
+@login_required(login_url='/useradmin/login/')
 def job_list(request):
    if request.method == 'DELETE':
       BackupJob.objects.get(pk=pk).delete()
@@ -205,3 +209,4 @@ def job_list(request):
    context = {"jobs": jobs, "form":form}
    return render(request, 'jobs/jobs.html', context)
    
+

@@ -4,17 +4,21 @@ from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate
 from django.db import IntegrityError
+from django.contrib.auth.decorators import login_required
 
+@login_required(login_url='/useradmin/login/')
 def userList(request):
    users = User.objects.all()
    context = {"users": users}
    return render(request, "useradmin/user_list.html", context)
 
+@login_required(login_url='/useradmin/login/')
 def userDetail(request, username):
    user = User.objects.get(username=username)
    context = {"user": user}
    return render(request, 'useradmin/user_detail.html', context)
 
+@login_required(login_url='/useradmin/login/')
 def createUser(request):
    if request.method == "POST":
       form = UserForm(request.POST)
@@ -34,6 +38,7 @@ def createUser(request):
    context = {"form": form}
    return render(request, 'useradmin/add_user.html', context)
 
+@login_required(login_url='/useradmin/login/')
 def deleteUser(request, username):
    user = User.objects.get(username=username)
    user.delete()

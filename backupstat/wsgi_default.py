@@ -9,8 +9,7 @@ https://docs.djangoproject.com/en/3.0/howto/deployment/wsgi/
 
 import os, sys
 
-sys.path.append('/home/azure-user/.local/lib/python3.6/site-packages')
-sys.path.append('/var/www/html/backupstat')
+sys.path.append('/home/azure-user/backupstat') 
 
 from django.core.wsgi import get_wsgi_application
 

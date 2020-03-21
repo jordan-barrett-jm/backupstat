@@ -13,3 +13,5 @@ class BackupJob(models.Model):
    status = models.CharField(max_length=50, default='', null=True, blank=True)
    comment = models.CharField(max_length=250, default='', null=True, blank=True)
    server = models.ForeignKey(Server, on_delete=models.CASCADE)
+
+

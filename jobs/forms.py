@@ -1,3 +1,4 @@
+
 from django import forms
 from backupserver.models import BackupServer
 import datetime
@@ -10,3 +11,4 @@ class FilterForm(forms.Form):
    fromDate = forms.DateField(initial=datetime.datetime.today()-datetime.timedelta(days=7), label="From")
    toDate = forms.DateField(initial=datetime.datetime.today(), label="To")
    
+

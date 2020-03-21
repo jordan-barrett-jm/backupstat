@@ -1,3 +1,4 @@
+
 from django.shortcuts import render
 from backupserver.models import BackupServer
 from backupserver.forms import BackupsvrForm
@@ -5,6 +6,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 
 #view all backup servers
+@login_required(login_url='/useradmin/login/')
 def backupsvrList(request):
 #   BackupServer.objects.all().delete()
    servers = BackupServer.objects.all()
@@ -19,6 +21,7 @@ def backupsvrDetail(request, server_id):
 
 #add backup servers, GET returns the form
 #POST saves the form fields to DB once valid
+@login_required(login_url='/useradmin/login/')
 def addBackupsvr(request):
    if request.method == "POST":
       form = BackupsvrForm(request.POST)
@@ -35,6 +38,8 @@ def addBackupsvr(request):
    return render(request, 'backupserver/addbackupserver.html', {'form':form})
 
 #delete backupserver given ID
+@login_required(login_url='/useradmin/login/')
 def deleteBackupsvr(request, server_id):
    BackupServer.objects.get(id=server_id).delete()
    return HttpResponseRedirect('/backup')
+
