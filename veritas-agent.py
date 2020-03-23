@@ -10,7 +10,7 @@ import re
 import configparser
 
 config = configparser.ConfigParser()
-config.read('veritas_agent.ini')
+config.read('veritas-agent.ini')
 LOG_DIRECTORY = config["CONFIGURATION"]["log_directory"]
 BACKUPSERVER_ID = int(config["CONFIGURATION"]["backupserver"])
 BACKUPSTAT_URL = config["CONFIGURATION"]["server_url"]
@@ -157,4 +157,4 @@ def backupstatPOST():
     print (data)
     
 backupstatPOST()
-exit()
+

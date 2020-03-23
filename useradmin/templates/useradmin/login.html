@@ -1,7 +1,22 @@
+{% load static %}
 <html>
 <head>
+	<style>
+	.content {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+	.login-button{
+  text-align: center;
+}
+	</style>
+	 <link rel="stylesheet" type="text/css" href={% static 'semantic.css'%}>
 </head>
 <body>
+	<div class="content">
 	<form method="post" action="{% url 'login' %}?next={{ next }}">
 		{% csrf_token %}
 		<table>
@@ -14,8 +29,12 @@
 			    <td>{{ form.password }}</td>
 			</tr>
 		</table>
-	<input type="submit" value="login">
+	<br>
+	<div class= "login-button">
+		<input type="submit" value="Sign in" class="small ui button">
+	</div>
 	<input type="hidden" name="next" value="{{ next }}">
 	</form>
+	</div>
 </body>
 </html>
