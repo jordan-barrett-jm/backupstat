@@ -51,6 +51,7 @@ def addJobs(data):
       #don't save repeats
       jobfilter = BackupJob.objects.filter(name=job["name"].strip(), start_time=job["start_time"].strip())
       if jobfilter:
+         print (job)
          continue
       serializer = JobSerializer(data=jobFormat(job, backup_server))
       if serializer.is_valid():
@@ -188,19 +189,20 @@ def job_list(request):
             context = {"jobs":filtered_jobs, "form":newform}
             return render(request, 'jobs/jobs.html', context)
    else:
-      if "sort" in request.session:
-         sort_type = request.session["sort"]
-         jobs = jobSort(sort_type[0], sort_type[1], jobs)
+   #always filter before you sort. if you sort before filtering then the filter erases the sort.
       if "filter" in request.session:
          filter_data = request.session["filter"]
          fromDate = datetime.datetime.strptime(filter_data["fromDate"], "%Y-%m-%d").date()
          toDate = datetime.datetime.strptime(filter_data["toDate"], "%Y-%m-%d").date()
          form_dict = {"backupserver": filter_data["backupserver"], "fromDate": fromDate, "toDate": toDate}
          jobs = filterJobs(form_dict)
+      if "sort" in request.session:
+         sort_type = request.session["sort"]
+         jobs = jobSort(sort_type[0], sort_type[1], jobs)
    #if the user has not specified a sort then provide default sort which is from latest start time to oldest
    if "sort" not in request.session:
       print ("right here")
-      jobs = jobs.order_by("start_time").reverse()
+      jobs = jobSort("start_time", "descending", jobs)
 #   paginator = Paginator(jobs, 2)
 #   print ('page' in request.GET)
 #   page_num = request.GET.get('page')
