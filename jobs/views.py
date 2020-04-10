@@ -1,4 +1,3 @@
-
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -142,6 +141,20 @@ def sortType(rq):
       sort_type = rq.get("sort")
       return (sort_type, "ascending")
 
+#paginates jobs
+def job_pages(jobs, request):
+   if "item_count" in request.GET:
+      item_count = request.GET.get("item_count")
+      request.session["item_count"] = item_count
+   elif "item_count" in request.session:
+      item_count = request.session["item_count"]
+   else:
+      item_count = 20
+   paginator = Paginator(jobs, item_count)
+   page_num = request.GET.get('page')
+   job_page = paginator.get_page(page_num)
+   return job_page
+
 #returns a list of backup jobs
 @login_required(login_url='/useradmin/login/')
 def job_list(request):
@@ -186,6 +199,7 @@ def job_list(request):
                sort_type = request.session["sort"]
                filtered_jobs = jobSort(sort_type[0], sort_type[1],  filtered_jobs)
             newform = FilterForm()
+            filtered_jobs = job_pages(filtered_jobs, request)
             context = {"jobs":filtered_jobs, "form":newform}
             return render(request, 'jobs/jobs.html', context)
    else:
@@ -203,10 +217,7 @@ def job_list(request):
    if "sort" not in request.session:
       print ("right here")
       jobs = jobSort("start_time", "descending", jobs)
-#   paginator = Paginator(jobs, 2)
-#   print ('page' in request.GET)
-#   page_num = request.GET.get('page')
-#   job_page = paginator.get_page(page_num)
+   jobs = job_pages(jobs, request)
    form = FilterForm()
    context = {"jobs": jobs, "form":form}
    return render(request, 'jobs/jobs.html', context)

@@ -6,6 +6,17 @@
 		{{ form }}
 		<input type="submit" value="Filter">		
 	</form>
+	<form action="" method="get">
+		<select name="item_count">
+			<option value="10">10</option>
+			<option value="15">15</option>
+			<option value="20">20</option>
+			<option value="30">30</option>
+			<option value="50">50</option>
+			<option value="100">100</option>
+		</select>
+		 <input type="submit" value="Apply">
+        </form>
 	<div>
 	<table class="ui celled table">
 		<thead>
@@ -39,5 +50,21 @@
 		{% endif %}
 		</tbody>
 	</table>
+	</div>
+	<div class="pagination">
+		<span class="step-links">
+        {% if jobs.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ jobs.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ jobs.number }} of {{ jobs.paginator.num_pages }}.
+        </span>
+
+        {% if jobs.has_next %}
+            <a href="?page={{ jobs.next_page_number }}">next</a>
+            <a href="?page={{ jobs.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
 	</div>
 {% endblock %}
