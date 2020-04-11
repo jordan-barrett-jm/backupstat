@@ -142,7 +142,7 @@ def sortType(rq):
       return (sort_type, "ascending")
 
 #paginates jobs
-def job_pages(jobs, request):
+def paginate(jobs, request):
    if "item_count" in request.GET:
       item_count = request.GET.get("item_count")
       request.session["item_count"] = item_count
@@ -167,8 +167,9 @@ def job_list(request):
       fromDate = datetime.datetime.today() - datetime.timedelta(days=7)
       toDate = datetime.datetime.today()
       jobs = timeFilter(jobs, fromDate.date(), toDate.date())
+   print (request.GET)
    #checks if there were additional parameters passed to the site in the URL (if there is a sort or filter being done)
-   if request.GET:
+   if "sort" in request.GET or "sort-reverse" in request.GET or "backupserver" in request.GET:
    #if a sort request was made by the user then handle it
       if "sort" in request.GET or "sort-reverse" in request.GET:
           sort = sortType(request.GET)
@@ -199,7 +200,7 @@ def job_list(request):
                sort_type = request.session["sort"]
                filtered_jobs = jobSort(sort_type[0], sort_type[1],  filtered_jobs)
             newform = FilterForm()
-            filtered_jobs = job_pages(filtered_jobs, request)
+            filtered_jobs = paginate(filtered_jobs, request)
             context = {"jobs":filtered_jobs, "form":newform}
             return render(request, 'jobs/jobs.html', context)
    else:
@@ -217,7 +218,7 @@ def job_list(request):
    if "sort" not in request.session:
       print ("right here")
       jobs = jobSort("start_time", "descending", jobs)
-   jobs = job_pages(jobs, request)
+   jobs = paginate(jobs, request)
    form = FilterForm()
    context = {"jobs": jobs, "form":form}
    return render(request, 'jobs/jobs.html', context)
