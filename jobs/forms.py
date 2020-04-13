@@ -10,6 +10,13 @@ class FilterForm(forms.Form):
    fromDate = forms.DateField(initial=datetime.datetime.today()-datetime.timedelta(days=7), label="From")
    toDate = forms.DateField(initial=datetime.datetime.today(), label="To")
    def __init__(self, *args, **kwargs):
+      form_initial = kwargs.get('form_initial', None)
+      updated_initial = {}
+      if form_initial:
+         updated_initial["backupserver"] = form_initial["backupserver"]
+         updated_initial["fromDate"] = form_initial["fromDate"]
+         updated_initial["toDate"] = form_initial["toDate"]
+      kwargs.update(initial = updated_initial)
       #BKCHOICES is only loaded once on the initialization of the application so to update the choice with what is in the DB the init module needs to be modified
       super(FilterForm, self).__init__(*args, **kwargs)
       BKCHOICES = [("--ALL--", "ALL")]+[(server.id, server.name) for server in BackupServer.objects.all()]

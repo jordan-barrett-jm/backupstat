@@ -7,7 +7,8 @@
 		<input type="submit" value="Filter">		
 	</form>
 	<form action="" method="get">
-		<select name="item_count">
+		<label for="item_count">Jobs Per Page</label>
+		<select name="item_count" id="item_count">
 			<option value="10">10</option>
 			<option value="15">15</option>
 			<option value="20">20</option>
@@ -67,4 +68,9 @@
             <a href="?page={{ jobs.paginator.num_pages }}">last &raquo;</a>
         {% endif %}
 	</div>
+        {% if page_count%}
+        	<script type="text/javascript">
+			document.getElementById('item_count').value = {{ page_count }};
+		</script>
+	{% endif%}
 {% endblock %}

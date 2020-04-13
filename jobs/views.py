@@ -158,6 +158,13 @@ def paginate(jobs, request):
 #returns a list of backup jobs
 @login_required(login_url='/useradmin/login/')
 def job_list(request):
+   #form_initial is used to autofill the form with the sort, filter and pagination settings applied
+   form_initial = {}
+   page_count = 0
+   if "item_count" in request.session:
+      page_count = request.session["item_count"]
+   if "item_count" in request.GET:
+      page_count = request.GET.get("item_count")
    if request.method == 'DELETE':
       BackupJob.objects.get(pk=pk).delete()
       return Response(status=status.HTTP_204_NO_CONTENT)
@@ -167,7 +174,6 @@ def job_list(request):
       fromDate = datetime.datetime.today() - datetime.timedelta(days=7)
       toDate = datetime.datetime.today()
       jobs = timeFilter(jobs, fromDate.date(), toDate.date())
-   print (request.GET)
    #checks if there were additional parameters passed to the site in the URL (if there is a sort or filter being done)
    if "sort" in request.GET or "sort-reverse" in request.GET or "backupserver" in request.GET:
    #if a sort request was made by the user then handle it
@@ -182,6 +188,7 @@ def job_list(request):
              toDate = datetime.datetime.strptime(filter_data["toDate"], "%Y-%m-%d").date()
              #put the data into a dictionary so filterJobs can operate on it
              form_dict = {"backupserver": filter_data["backupserver"], "fromDate": fromDate, "toDate": toDate}
+             form_initial = form_dict
              #apply and save the filter to jobs
              jobs = filterJobs(form_dict)
           if jobs:
@@ -199,9 +206,9 @@ def job_list(request):
             if filtered_jobs and "sort" in request.session:
                sort_type = request.session["sort"]
                filtered_jobs = jobSort(sort_type[0], sort_type[1],  filtered_jobs)
-            newform = FilterForm()
+            newform = FilterForm(form_data)
             filtered_jobs = paginate(filtered_jobs, request)
-            context = {"jobs":filtered_jobs, "form":newform}
+            context = {"jobs":filtered_jobs, "form":newform, "page_count": page_count}
             return render(request, 'jobs/jobs.html', context)
    else:
    #always filter before you sort. if you sort before filtering then the filter erases the sort.
@@ -211,6 +218,7 @@ def job_list(request):
          toDate = datetime.datetime.strptime(filter_data["toDate"], "%Y-%m-%d").date()
          form_dict = {"backupserver": filter_data["backupserver"], "fromDate": fromDate, "toDate": toDate}
          jobs = filterJobs(form_dict)
+         form_initial = form_dict
       if "sort" in request.session:
          sort_type = request.session["sort"]
          jobs = jobSort(sort_type[0], sort_type[1], jobs)
@@ -219,8 +227,8 @@ def job_list(request):
       print ("right here")
       jobs = jobSort("start_time", "descending", jobs)
    jobs = paginate(jobs, request)
-   form = FilterForm()
-   context = {"jobs": jobs, "form":form}
+   form = FilterForm(form_initial)
+   context = {"jobs": jobs, "form":form, "page_count": page_count}
    return render(request, 'jobs/jobs.html', context)
    
 
