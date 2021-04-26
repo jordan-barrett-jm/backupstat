@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -48,7 +49,9 @@ def addJobs(data):
    result = False
    for job in jobs:
       #don't save repeats
-      jobfilter = BackupJob.objects.filter(name=job["name"].strip(), start_time=job["start_time"].strip())
+      st = job["start_time"]
+      st = datetime.datetime.strptime(st, "%m/%d/%Y %H:%M:%S")
+      jobfilter = BackupJob.objects.filter(name=job["name"].strip(), start_time=str(st.strftime("%Y-%m-%d %H:%M:%S")).strip())
       if jobfilter:
          print (job)
          continue
@@ -169,6 +172,8 @@ def job_list(request):
       BackupJob.objects.get(pk=pk).delete()
       return Response(status=status.HTTP_204_NO_CONTENT)
    jobs = BackupJob.objects.all()
+   """
+   print (jobs)
    #if the user has not specified a filter and is not requesting a filter to be applied then apply the default filter
    if "filter" not in request.session and "backupserver" not in request.GET:
       fromDate = datetime.datetime.today() - datetime.timedelta(days=7)
@@ -223,12 +228,15 @@ def job_list(request):
          sort_type = request.session["sort"]
          jobs = jobSort(sort_type[0], sort_type[1], jobs)
    #if the user has not specified a sort then provide default sort which is from latest start time to oldest
+   print (jobs)
    if "sort" not in request.session:
       print ("right here")
       jobs = jobSort("start_time", "descending", jobs)
+   """
    jobs = paginate(jobs, request)
    form = FilterForm(form_initial)
    context = {"jobs": jobs, "form":form, "page_count": page_count}
    return render(request, 'jobs/jobs.html', context)
    
-
+def bool(request):
+   return HttpResponse("niggas be boolin")

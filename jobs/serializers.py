@@ -10,6 +10,7 @@ class ServerSerializer(serializers.ModelSerializer):
 
 class JobSerializer(serializers.ModelSerializer):
    server = serializers.PrimaryKeyRelatedField(queryset=Server.objects.all())
+   start_time = serializers.DateTimeField(input_formats=["%m/%d/%Y %H:%M:%S"])
    class Meta:
       model = BackupJob
       fields = ('id','name', 'type', 'start_time', 'status', 'comment', 'server')
