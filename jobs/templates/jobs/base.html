@@ -3,6 +3,9 @@
 <head>
         <link rel="stylesheet" type="text/css" href={% static 'semantic.css'%}>
         <script src="https://kit.fontawesome.com/54cd34c730.js" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+	
 </head>
 <body>
         <div class="ui menu">
@@ -15,4 +18,11 @@
 	{% block content %}
 	{% endblock %}
 	</div>
+	<script>
+		flatpickr("#datefield", {
+		    enableTime: false,
+		    dateFormat: "Y-m-d",
+		});
+
+	</script>
 </body>

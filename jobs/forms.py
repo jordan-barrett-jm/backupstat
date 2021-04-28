@@ -7,8 +7,8 @@ BKCHOICES = [("--ALL--", "ALL")]+[(server.id, server.name) for server in BackupS
 
 class FilterForm(forms.Form):
    backupserver = forms.ChoiceField(choices=BKCHOICES, initial="--ALL--", required=False, label="Backup Server")
-   fromDate = forms.DateField(initial=datetime.datetime.today()-datetime.timedelta(days=7), label="From")
-   toDate = forms.DateField(initial=datetime.datetime.today(), label="To")
+   fromDate = forms.DateField(widget=forms.TextInput(attrs={'id':'datefield'}), label="From")
+   toDate = forms.DateField(widget=forms.TextInput(attrs={'id':'datefield'}), label="To")
    def __init__(self, *args, **kwargs):
       form_initial = kwargs.get('form_initial', None)
       updated_initial = {}

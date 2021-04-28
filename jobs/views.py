@@ -93,7 +93,7 @@ def job_post(request):
 def timeFilter(jobs, fromDate, toDate):
    filter_jobs = 0
    for job in jobs:
-      job_date = datetime.datetime.strptime(job.start_time, "%m/%d/%Y %H:%M:%S").date()
+      job_date = job.start_time.date()
       if toDate >= job_date >= fromDate:
          if not filter_jobs:
             filter_jobs = BackupJob.objects.filter(id=job.id)
@@ -172,7 +172,6 @@ def job_list(request):
       BackupJob.objects.get(pk=pk).delete()
       return Response(status=status.HTTP_204_NO_CONTENT)
    jobs = BackupJob.objects.all()
-   """
    print (jobs)
    #if the user has not specified a filter and is not requesting a filter to be applied then apply the default filter
    if "filter" not in request.session and "backupserver" not in request.GET:
@@ -232,7 +231,6 @@ def job_list(request):
    if "sort" not in request.session:
       print ("right here")
       jobs = jobSort("start_time", "descending", jobs)
-   """
    jobs = paginate(jobs, request)
    form = FilterForm(form_initial)
    context = {"jobs": jobs, "form":form, "page_count": page_count}
